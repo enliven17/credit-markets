@@ -1,0 +1,85 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export const formatFlowAmount = (amount: string): string => {
+  return parseFloat(amount).toFixed(8);
+};
+
+export const parseFlowAmount = (amount: string): number => {
+  return parseFloat(amount);
+};
+
+export const validateFlowAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{16}$/.test(address);
+};
+
+export interface FlowError {
+  message: string;
+  code?: number;
+  details?: any;
+}
+
+export const handleFlowError = (error: any): FlowError => {
+  if (error?.message) {
+    return {
+      message: error.message,
+      code: error.code,
+      details: error,
+    };
+  }
+  return { message: "Unknown Flow error occurred", details: error };
+};
+
+export const truncateAddress = (address: string): string => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
+export const formatTime = (milliseconds: number): string => {
+  const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+};
+
+export const copyToClipboard = async (text: string): Promise<void> => {
+  await navigator.clipboard.writeText(text);
+};
+
+// Creditcoin Blockscout helper (testnet by default)
+export const getCreditcoinBlockscoutUrl = (address: string): string => {
+  const baseUrl = "https://creditcoin-testnet.blockscout.com";
+  return `${baseUrl}/address/${address}`;
+};
+
+// Backward-compat wrapper (prefer getCreditcoinBlockscoutUrl going forward)
+export const getFlowscanUrl = (address: string): string => {
+  return getCreditcoinBlockscoutUrl(address);
+};
+
+export const getAvatarFallback = (address: string): string => {
+  return address.slice(2, 4).toUpperCase();
+};
+
+export const safeToString = (value: any): string => {
+  if (value === null || value === undefined) return "";
+  return String(value);
+};
+
+export const safeToNumber = (value: any, defaultValue: number = 0): number => {
+  if (value === null || value === undefined) return defaultValue;
+  const parsed = parseInt(safeToString(value));
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+};
+
+export const safeToUInt64 = (value: any, defaultValue: number = 0): number => {
+  if (value === null || value === undefined) return defaultValue;
+  if (typeof value === "object" && (value as any).rawValue !== undefined) {
+    return parseInt((value as any).rawValue.toString());
+  }
+  const parsed = parseInt(safeToString(value));
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+};
