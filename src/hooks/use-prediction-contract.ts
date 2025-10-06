@@ -106,10 +106,35 @@ export const usePredictionContract = () => {
     }
   };
 
+  // Claim Winnings Function
+  const claimWinnings = async (marketId: string) => {
+    try {
+      setIsLoading(true);
+      console.log('💰 Claiming winnings for market:', marketId);
+      
+      const result = await writeContract({
+        address: PREDICTION_MARKET_ADDRESS,
+        abi: PREDICTION_MARKET_ABI,
+        functionName: 'claimWinnings',
+        args: [BigInt(marketId)],
+      });
+      
+      toast.success('Winnings claimed successfully!');
+      return result;
+    } catch (error: any) {
+      console.error('❌ Error claiming winnings:', error);
+      toast.error(error?.message || 'Failed to claim winnings');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     placeBet,
     resolveMarket,
     createMarket,
+    claimWinnings,
     isLoading: isLoading || isPending || isConfirming,
     isSuccess,
     hash,

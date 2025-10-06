@@ -43,6 +43,15 @@ export const PREDICTION_MARKET_ABI = [
     "type": "function"
   },
   
+  // Claim Winnings
+  {
+    "inputs": [{"name": "_marketId", "type": "uint256"}],
+    "name": "claimWinnings",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  
   // View Functions
   {
     "inputs": [{"name": "_marketId", "type": "uint256"}],

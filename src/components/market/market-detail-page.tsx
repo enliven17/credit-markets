@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePredictionContractRead } from "@/hooks/use-prediction-contract";
+import { usePredictionContractRead, usePredictionContract } from "@/hooks/use-prediction-contract";
+import { OwnerOnly } from "@/components/auth/owner-only";
 import { useAccount } from "wagmi";
 import { MarketStatus } from "@/types/market";
 import {
@@ -40,6 +41,7 @@ export default function MarketDetailPage() {
 
   // Use contract hooks for real data
   const { getMarket, getUserPosition } = usePredictionContractRead();
+  const { claimWinnings, resolveMarket } = usePredictionContract();
   const { market, isLoading: marketLoading, refetch: refetchMarket } = getMarket(marketId);
   const { position: userPosition, isLoading: positionLoading, refetch: refetchPosition } = getUserPosition(address || "", marketId);
 
@@ -145,6 +147,34 @@ export default function MarketDetailPage() {
       refetchMarket();
       refetchPosition();
     }, 2000);
+  };
+
+  const handleClaimWinnings = async () => {
+    if (!market || !userPosition) return;
+    
+    try {
+      await claimWinnings(marketId);
+      setTimeout(() => {
+        refetchMarket();
+        refetchPosition();
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to claim winnings:', error);
+    }
+  };
+
+  const handleResolveMarket = async (outcome: 0 | 1) => {
+    if (!market) return;
+    
+    try {
+      await resolveMarket(marketId, outcome);
+      setTimeout(() => {
+        refetchMarket();
+        refetchPosition();
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to resolve market:', error);
+    }
   };
 
   return (
@@ -310,7 +340,7 @@ export default function MarketDetailPage() {
                       <Zap className="h-4 w-4 text-[#22c55e]" />
                       <span>Your Position</span>
                     </h4>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-3 gap-4 text-sm mb-4">
                       <div className="text-center">
                         <div className="text-[#22c55e] font-bold text-lg">
                           {formatCurrency(userPosition.optionAShares)}
@@ -330,6 +360,28 @@ export default function MarketDetailPage() {
                         <div className="text-gray-500 text-xs">Total invested</div>
                       </div>
                     </div>
+                    
+                    {/* Claim Winnings Button - Only show if market is resolved and user has winning position */}
+                    {actualStatus === MarketStatus.Resolved && market.outcome !== undefined && (
+                      (() => {
+                        const hasWinningShares = market.outcome === 0 
+                          ? parseFloat(userPosition.optionAShares) > 0
+                          : parseFloat(userPosition.optionBShares) > 0;
+                        
+                        if (hasWinningShares) {
+                          return (
+                            <Button
+                              onClick={handleClaimWinnings}
+                              className="w-full bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg"
+                              size="sm"
+                            >
+                              💰 Claim Winnings
+                            </Button>
+                          );
+                        }
+                        return null;
+                      })()
+                    )}
                   </div>
                 )}
 
@@ -488,6 +540,31 @@ export default function MarketDetailPage() {
                       <CountdownTimer endTime={parseInt(market.endTime) * 1000} />
                     </div>
                   )}
+                  
+                  {/* Admin Controls - Only show if market ended but not resolved */}
+                  <OwnerOnly showFallback={false}>
+                    {actualStatus === MarketStatus.Paused && !market.resolved && (
+                      <div className="space-y-3 pt-4 border-t border-gray-800/50">
+                        <h5 className="text-sm font-semibold text-gray-300 text-center">Admin: Resolve Market</h5>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={() => handleResolveMarket(0)}
+                            className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white text-xs"
+                            size="sm"
+                          >
+                            {market.optionA} Wins
+                          </Button>
+                          <Button
+                            onClick={() => handleResolveMarket(1)}
+                            className="bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-500 hover:to-gray-400 text-white text-xs"
+                            size="sm"
+                          >
+                            {market.optionB} Wins
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </OwnerOnly>
                 </div>
               </CardContent>
             </Card>
