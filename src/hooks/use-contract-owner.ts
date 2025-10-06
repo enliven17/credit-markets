@@ -19,10 +19,10 @@ export const useContractOwner = () => {
           return;
         }
 
-        const contractAddress = process.env.NEXT_PUBLIC_CREDITPREDICT_CONTRACT;
+        const adminAddress = process.env.NEXT_PUBLIC_ADMIN_ADDRESS;
 
-        if (!contractAddress) {
-          setError("Contract address not configured");
+        if (!adminAddress) {
+          setError("Admin address not configured");
           setIsOwner(false);
           setIsLoading(false);
           return;
@@ -30,7 +30,7 @@ export const useContractOwner = () => {
 
         const userWalletAddress = address;
         const isContractOwner =
-          userWalletAddress.toLowerCase() === contractAddress.toLowerCase();
+          userWalletAddress.toLowerCase() === adminAddress.toLowerCase();
 
         setIsOwner(isContractOwner);
       } catch (err) {
@@ -51,7 +51,7 @@ export const useContractOwner = () => {
     isOwner,
     isLoading,
     error,
-    contractAddress: process.env.NEXT_PUBLIC_CREDITPREDICT_CONTRACT || "",
+    contractAddress: process.env.NEXT_PUBLIC_ADMIN_ADDRESS || "",
     userAddress: address || "",
   };
 };
