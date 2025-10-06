@@ -109,8 +109,8 @@ export function getCategoryColor(category: MarketCategory): string {
 }
 
 // Validation utilities
-export function isValidFlowAddress(address: string): boolean {
-  return /^0x[a-fA-F0-9]{16}$/.test(address);
+export function isValidAddress(address: string): boolean {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
 }
 
 export function isValidAmount(amount: string): boolean {

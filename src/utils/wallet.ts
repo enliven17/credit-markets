@@ -1,1 +1,22 @@
-﻿`nexport const truncateAddress = (address: string): string => {`n  return `${address.slice(0, 6)}...${address.slice(-4)}`;`n};`n`nexport const formatTime = (milliseconds: number): string => {`n  const hours = Math.floor(milliseconds / (1000 * 60 * 60));`n  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));`n  return `${hours}h ${minutes}m`;`n};`n`nexport const copyToClipboard = async (text: string): Promise<void> => {`n  await navigator.clipboard.writeText(text);`n};`n`nexport const getFlowscanUrl = (address: string): string => {`n  const baseUrl = 'https://creditcoin-testnet.blockscout.com';`n  return `${baseUrl}/address/${address}`;`n};`n`nexport const getAvatarFallback = (address: string): string => {`n  return address.slice(2, 4).toUpperCase();`n};
+﻿export const truncateAddress = (address: string): string => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
+export const formatTime = (milliseconds: number): string => {
+  const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+  const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+};
+
+export const copyToClipboard = async (text: string): Promise<void> => {
+  await navigator.clipboard.writeText(text);
+};
+
+export const getBlockscoutUrl = (address: string): string => {
+  const baseUrl = 'https://creditcoin-testnet.blockscout.com';
+  return `${baseUrl}/address/${address}`;
+};
+
+export const getAvatarFallback = (address: string): string => {
+  return address.slice(2, 4).toUpperCase();
+};

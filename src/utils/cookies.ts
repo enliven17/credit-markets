@@ -1,1 +1,48 @@
-﻿/**`n * Cookie utilities for Credit Predict app`n */`n`nexport const setCookie = (name: string, value: string, days: number = 365): void => {`n  const expires = new Date();`n  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);`n  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;`n};`n`nexport const getCookie = (name: string): string | null => {`n  const nameEQ = name + "=";`n  const ca = document.cookie.split(';');`n  for (let i = 0; i < ca.length; i++) {`n    let c = ca[i];`n    while (c.charAt(0) === ' ') c = c.substring(1, c.length);`n    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);`n  }`n  return null;`n};`n`nexport interface BetInfo {`n  marketId: string;`n  side: "optionA" | "optionB";`n  amount: number;`n  shares: number;`n  timestamp: number;`n  transactionId: string;`n  marketTitle?: string;`n  optionName?: string;`n}`n`nexport const addBetToHistory = (address: string, betInfo: BetInfo): void => {`n  const existingBets = getUserBetHistory(address);`n  const updatedBets = [...existingBets, betInfo];`n  setCookie(`flow_wager_bets_${address}`, JSON.stringify(updatedBets));`n};`n`nexport const getUserBetHistory = (address: string): BetInfo[] => {`n  const cookieData = getCookie(`flow_wager_bets_${address}`);`n  if (!cookieData) return [];`n  `n  try {`n    return JSON.parse(cookieData);`n  } catch {`n    return [];`n  }`n};
+﻿/**
+ * Cookie utilities for Credit Predict app
+ */
+
+export const setCookie = (name: string, value: string, days: number = 365): void => {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+};
+
+export const getCookie = (name: string): string | null => {
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
+export interface BetInfo {
+  marketId: string;
+  side: "optionA" | "optionB";
+  amount: number;
+  shares: number;
+  timestamp: number;
+  transactionId: string;
+  marketTitle?: string;
+  optionName?: string;
+}
+
+export const addBetToHistory = (address: string, betInfo: BetInfo): void => {
+  const existingBets = getUserBetHistory(address);
+  const updatedBets = [...existingBets, betInfo];
+  setCookie(`prediction_bets_${address}`, JSON.stringify(updatedBets));
+};
+
+export const getUserBetHistory = (address: string): BetInfo[] => {
+  const cookieData = getCookie(`prediction_bets_${address}`);
+  if (!cookieData) return [];
+  
+  try {
+    return JSON.parse(cookieData);
+  } catch {
+    return [];
+  }
+};

@@ -6,25 +6,25 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatFlowAmount = (amount: string): string => {
+export const formatAmount = (amount: string): string => {
   return parseFloat(amount).toFixed(8);
 };
 
-export const parseFlowAmount = (amount: string): number => {
+export const parseAmount = (amount: string): number => {
   return parseFloat(amount);
 };
 
-export const validateFlowAddress = (address: string): boolean => {
-  return /^0x[a-fA-F0-9]{16}$/.test(address);
+export const validateAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
-export interface FlowError {
+export interface ContractError {
   message: string;
   code?: number;
   details?: any;
 }
 
-export const handleFlowError = (error: any): FlowError => {
+export const handleContractError = (error: any): ContractError => {
   if (error?.message) {
     return {
       message: error.message,
@@ -32,7 +32,7 @@ export const handleFlowError = (error: any): FlowError => {
       details: error,
     };
   }
-  return { message: "Unknown Flow error occurred", details: error };
+  return { message: "Unknown contract error occurred", details: error };
 };
 
 export const truncateAddress = (address: string): string => {
@@ -56,7 +56,7 @@ export const getCreditcoinBlockscoutUrl = (address: string): string => {
 };
 
 // Backward-compat wrapper (prefer getCreditcoinBlockscoutUrl going forward)
-export const getFlowscanUrl = (address: string): string => {
+export const getBlockscoutUrl = (address: string): string => {
   return getCreditcoinBlockscoutUrl(address);
 };
 

@@ -1,1 +1,314 @@
-﻿// src/types/api.ts`n// API request/response type definitions`n`nimport type { Market, MarketActivity, MarketChartData, MarketOdds } from './market';`nimport type { UserStats, UserPosition, UserActivityItem, UserAchievement, LeaderboardUser, UserSearchResult, UserNotification, UserPreferences } from './user';`n`n// Base API response structure`nexport interface ApiResponse<T = any> {`n  success: boolean;`n  data?: T;`n  error?: ApiError;`n  message?: string;`n  timestamp: number;`n}`n`nexport interface ApiError {`n  code: string;`n  message: string;`n  details?: any;`n  field?: string; // For validation errors`n}`n`nexport interface PaginatedResponse<T> {`n  items: T[];`n  pagination: {`n    page: number;`n    limit: number;`n    total: number;`n    pages: number;`n    hasNext: boolean;`n    hasPrev: boolean;`n  };`n}`n`n// Markets API`nexport interface GetMarketsRequest {`n  page?: number;`n  limit?: number;`n  category?: string;`n  status?: string;`n  search?: string;`n  sortBy?: string;`n  sortOrder?: 'asc' | 'desc';`n  isBreakingNews?: boolean;`n  creator?: string;`n}`n`nexport interface GetMarketsResponse extends PaginatedResponse<Market> {}`n`nexport interface GetMarketRequest {`n  id: string;`n  includeActivity?: boolean;`n  includeChart?: boolean;`n}`n`nexport interface GetMarketResponse {`n  market: Market;`n  activity?: MarketActivity[];`n  chartData?: MarketChartData[];`n  odds: MarketOdds;`n  timeRemaining: number;`n}`n`nexport interface CreateMarketRequest {`n  question: string;`n  optionA: string;`n  optionB: string;`n  category: string;`n  imageURI?: string;`n  duration: number;`n  isBreakingNews: boolean;`n  minBet: number;`n  maxBet: number;`n}`n`nexport interface CreateMarketResponse {`n  marketId: number;`n  market: Market;`n}`n`n// Users API`nexport interface GetUserStatsRequest {`n  address: string;`n  period?: 'all_time' | 'monthly' | 'weekly';`n}`n`nexport interface GetUserStatsResponse {`n  stats: UserStats;`n  recentActivity: UserActivityItem[];`n  achievements: UserAchievement[];`n}`n`nexport interface GetUserPositionsRequest {`n  address: string;`n  status?: 'active' | 'claimable' | 'claimed' | 'all';`n  page?: number;`n  limit?: number;`n}`n`nexport interface GetUserPositionsResponse extends PaginatedResponse<UserPosition> {}`n`nexport interface GetLeaderboardRequest {`n  sortBy?: 'winnings' | 'win_rate' | 'streak' | 'roi';`n  period?: 'all_time' | 'monthly' | 'weekly';`n  limit?: number;`n  userAddress?: string; // To get user's rank`n}`n`nexport interface GetLeaderboardResponse {`n  leaderboard: LeaderboardUser[];`n  userRank?: number;`n  period: string;`n  sortBy: string;`n}`n`nexport interface UpdateUserProfileRequest {`n  username?: string;`n  bio?: string;`n  avatar?: string;`n}`n`nexport interface UpdateUserPreferencesRequest {`n  notifications?: Partial<UserPreferences['notifications']>;`n  privacy?: Partial<UserPreferences['privacy']>;`n  display?: Partial<UserPreferences['display']>;`n}`n`n// Positions API`nexport interface CreatePositionRequest {`n  marketId: number;`n  isOptionA: boolean;`n  shares: number;`n  amountInvested: number;`n  txId: string; // Flow transaction ID`n}`n`nexport interface CreatePositionResponse {`n  position: UserPosition;`n  market: Market;`n}`n`nexport interface ClaimWinningsRequest {`n  marketId: number;`n  txId: string; // Flow transaction ID`n}`n`nexport interface ClaimWinningsResponse {`n  amount: number;`n  fees: number;`n  position: UserPosition;`n}`n`n// IPFS API`nexport interface UploadToIPFSRequest {`n  file: File;`n  metadata?: {`n    name?: string;`n    description?: string;`n    attributes?: Record<string, any>;`n  };`n}`n`nexport interface UploadToIPFSResponse {`n  cid: string;`n  url: string;`n  metadata?: any;`n}`n`n// Admin API`nexport interface ResolveMarketRequest {`n  marketId: number;`n  outcome: string;`n  reason?: string;`n  txId: string;`n}`n`nexport interface ResolveMarketResponse {`n  market: Market;`n  affectedUsers: number;`n  totalPayout: number;`n}`n`nexport interface GetPlatformStatsRequest {`n  period?: 'all_time' | 'monthly' | 'weekly' | 'daily';`n}`n`nexport interface GetPlatformStatsResponse {`n  totalMarkets: number;`n  activeMarkets: number;`n  totalVolume: number;`n  totalUsers: number;`n  totalFeesCollected: number;`n  averageMarketDuration: number;`n  topCategories: Array<{`n    category: string;`n    count: number;`n    volume: number;`n  }>;`n  chartData: Array<{`n    timestamp: number;`n    volume: number;`n    users: number;`n    markets: number;`n  }>;`n}`n`n// Search API`nexport interface SearchRequest {`n  query: string;`n  type?: 'markets' | 'users' | 'all';`n  limit?: number;`n  filters?: {`n    category?: string;`n    status?: string;`n    minPool?: number;`n    maxPool?: number;`n  };`n}`n`nexport interface SearchResponse {`n  markets: Market[];`n  users: UserSearchResult[];`n  total: number;`n}`n`n// Notifications API`nexport interface GetNotificationsRequest {`n  address: string;`n  page?: number;`n  limit?: number;`n  unreadOnly?: boolean;`n}`n`nexport interface GetNotificationsResponse extends PaginatedResponse<UserNotification> {`n  unreadCount: number;`n}`n`nexport interface MarkNotificationReadRequest {`n  notificationId: string;`n}`n`nexport interface CreateNotificationRequest {`n  userAddress: string;`n  type: UserNotification['type'];`n  title: string;`n  message: string;`n  actionUrl?: string;`n  data?: Record<string, any>;`n}`n`n// WebSocket events`nexport interface WebSocketEvent {`n  type: string;`n  timestamp: number;`n  data: any;`n}`n`nexport interface MarketUpdateEvent extends WebSocketEvent {`n  type: 'market_update';`n  data: {`n    marketId: number;`n    odds: MarketOdds;`n    totalPool: number;`n    shares: {`n      optionA: number;`n      optionB: number;`n    };`n  };`n}`n`nexport interface NewMarketEvent extends WebSocketEvent {`n  type: 'new_market';`n  data: {`n    market: Market;`n  };`n}`n`nexport interface MarketResolvedEvent extends WebSocketEvent {`n  type: 'market_resolved';`n  data: {`n    marketId: number;`n    outcome: string;`n    winningOption: string;`n  };`n}`n`nexport interface UserNotificationEvent extends WebSocketEvent {`n  type: 'user_notification';`n  data: {`n    userAddress: string;`n    notification: UserNotification;`n  };`n}`n`n// Rate limiting`nexport interface RateLimitInfo {`n  limit: number;`n  remaining: number;`n  reset: number; // timestamp`n  retryAfter?: number; // seconds`n}`n`n// Health check`nexport interface HealthCheckResponse {`n  status: 'healthy' | 'degraded' | 'unhealthy';`n  version: string;`n  timestamp: number;`n  services: {`n    database: 'up' | 'down';`n    ipfs: 'up' | 'down';`n    flow: 'up' | 'down';`n  };`n  uptime: number;`n}
+﻿// src/types/api.ts
+// API request/response type definitions
+
+import type { Market, MarketActivity, MarketChartData, MarketOdds } from './market';
+import type { UserStats, UserPosition, UserActivityItem, UserAchievement, LeaderboardUser, UserSearchResult, UserNotification, UserPreferences } from './user';
+
+// Base API response structure
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: ApiError;
+  message?: string;
+  timestamp: number;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: any;
+  field?: string; // For validation errors
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+// Markets API
+export interface GetMarketsRequest {
+  page?: number;
+  limit?: number;
+  category?: string;
+  status?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  isBreakingNews?: boolean;
+  creator?: string;
+}
+
+export interface GetMarketsResponse extends PaginatedResponse<Market> {}
+
+export interface GetMarketRequest {
+  id: string;
+  includeActivity?: boolean;
+  includeChart?: boolean;
+}
+
+export interface GetMarketResponse {
+  market: Market;
+  activity?: MarketActivity[];
+  chartData?: MarketChartData[];
+  odds: MarketOdds;
+  timeRemaining: number;
+}
+
+export interface CreateMarketRequest {
+  question: string;
+  optionA: string;
+  optionB: string;
+  category: string;
+  imageURI?: string;
+  duration: number;
+  isBreakingNews: boolean;
+  minBet: number;
+  maxBet: number;
+}
+
+export interface CreateMarketResponse {
+  marketId: number;
+  market: Market;
+}
+
+// Users API
+export interface GetUserStatsRequest {
+  address: string;
+  period?: 'all_time' | 'monthly' | 'weekly';
+}
+
+export interface GetUserStatsResponse {
+  stats: UserStats;
+  recentActivity: UserActivityItem[];
+  achievements: UserAchievement[];
+}
+
+export interface GetUserPositionsRequest {
+  address: string;
+  status?: 'active' | 'claimable' | 'claimed' | 'all';
+  page?: number;
+  limit?: number;
+}
+
+export interface GetUserPositionsResponse extends PaginatedResponse<UserPosition> {}
+
+export interface GetLeaderboardRequest {
+  sortBy?: 'winnings' | 'win_rate' | 'streak' | 'roi';
+  period?: 'all_time' | 'monthly' | 'weekly';
+  limit?: number;
+  userAddress?: string; // To get user's rank
+}
+
+export interface GetLeaderboardResponse {
+  leaderboard: LeaderboardUser[];
+  userRank?: number;
+  period: string;
+  sortBy: string;
+}
+
+export interface UpdateUserProfileRequest {
+  username?: string;
+  bio?: string;
+  avatar?: string;
+}
+
+export interface UpdateUserPreferencesRequest {
+  notifications?: Partial<UserPreferences['notifications']>;
+  privacy?: Partial<UserPreferences['privacy']>;
+  display?: Partial<UserPreferences['display']>;
+}
+
+// Positions API
+export interface CreatePositionRequest {
+  marketId: number;
+  isOptionA: boolean;
+  shares: number;
+  amountInvested: number;
+  txId: string; // Transaction ID
+}
+
+export interface CreatePositionResponse {
+  position: UserPosition;
+  market: Market;
+}
+
+export interface ClaimWinningsRequest {
+  marketId: number;
+  txId: string; // Transaction ID
+}
+
+export interface ClaimWinningsResponse {
+  amount: number;
+  fees: number;
+  position: UserPosition;
+}
+
+// IPFS API
+export interface UploadToIPFSRequest {
+  file: File;
+  metadata?: {
+    name?: string;
+    description?: string;
+    attributes?: Record<string, any>;
+  };
+}
+
+export interface UploadToIPFSResponse {
+  cid: string;
+  url: string;
+  metadata?: any;
+}
+
+// Admin API
+export interface ResolveMarketRequest {
+  marketId: number;
+  outcome: string;
+  reason?: string;
+  txId: string;
+}
+
+export interface ResolveMarketResponse {
+  market: Market;
+  affectedUsers: number;
+  totalPayout: number;
+}
+
+export interface GetPlatformStatsRequest {
+  period?: 'all_time' | 'monthly' | 'weekly' | 'daily';
+}
+
+export interface GetPlatformStatsResponse {
+  totalMarkets: number;
+  activeMarkets: number;
+  totalVolume: number;
+  totalUsers: number;
+  totalFeesCollected: number;
+  averageMarketDuration: number;
+  topCategories: Array<{
+    category: string;
+    count: number;
+    volume: number;
+  }>;
+  chartData: Array<{
+    timestamp: number;
+    volume: number;
+    users: number;
+    markets: number;
+  }>;
+}
+
+// Search API
+export interface SearchRequest {
+  query: string;
+  type?: 'markets' | 'users' | 'all';
+  limit?: number;
+  filters?: {
+    category?: string;
+    status?: string;
+    minPool?: number;
+    maxPool?: number;
+  };
+}
+
+export interface SearchResponse {
+  markets: Market[];
+  users: UserSearchResult[];
+  total: number;
+}
+
+// Notifications API
+export interface GetNotificationsRequest {
+  address: string;
+  page?: number;
+  limit?: number;
+  unreadOnly?: boolean;
+}
+
+export interface GetNotificationsResponse extends PaginatedResponse<UserNotification> {
+  unreadCount: number;
+}
+
+export interface MarkNotificationReadRequest {
+  notificationId: string;
+}
+
+export interface CreateNotificationRequest {
+  userAddress: string;
+  type: UserNotification['type'];
+  title: string;
+  message: string;
+  actionUrl?: string;
+  data?: Record<string, any>;
+}
+
+// WebSocket events
+export interface WebSocketEvent {
+  type: string;
+  timestamp: number;
+  data: any;
+}
+
+export interface MarketUpdateEvent extends WebSocketEvent {
+  type: 'market_update';
+  data: {
+    marketId: number;
+    odds: MarketOdds;
+    totalPool: number;
+    shares: {
+      optionA: number;
+      optionB: number;
+    };
+  };
+}
+
+export interface NewMarketEvent extends WebSocketEvent {
+  type: 'new_market';
+  data: {
+    market: Market;
+  };
+}
+
+export interface MarketResolvedEvent extends WebSocketEvent {
+  type: 'market_resolved';
+  data: {
+    marketId: number;
+    outcome: string;
+    winningOption: string;
+  };
+}
+
+export interface UserNotificationEvent extends WebSocketEvent {
+  type: 'user_notification';
+  data: {
+    userAddress: string;
+    notification: UserNotification;
+  };
+}
+
+// Rate limiting
+export interface RateLimitInfo {
+  limit: number;
+  remaining: number;
+  reset: number; // timestamp
+  retryAfter?: number; // seconds
+}
+
+// Health check
+export interface HealthCheckResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  version: string;
+  timestamp: number;
+  services: {
+    database: 'up' | 'down';
+    ipfs: 'up' | 'down';
+    blockchain: 'up' | 'down';
+  };
+  uptime: number;
+}

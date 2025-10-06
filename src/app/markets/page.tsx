@@ -7,43 +7,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getActiveMarkets } from "@/lib/flow/market-api";
+import { usePredictionContractRead } from "@/hooks/use-prediction-contract";
 import { Market } from "@/types/market";
 import {
-  Clock,
   DollarSign,
-  Filter,
-  Plus,
   Search,
   Timer,
   TrendingUp,
   Users
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function MarketsPage() {
-  const [markets, setMarkets] = useState<Market[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("active");
-
-  useEffect(() => {
-    const fetchMarkets = async () => {
-      try {
-        setLoading(true);
-        const data = await getActiveMarkets();
-        setMarkets(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch markets");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMarkets();
-  }, []);
+  
+  // Use contract hooks for real data
+  const { activeMarkets, activeMarketsLoading, refetchActiveMarkets } = usePredictionContractRead();
+  
+  const markets = activeMarkets;
+  const loading = activeMarketsLoading;
+  const error = null;
 
   const filteredMarkets = markets.filter(market =>
     market.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,7 +41,9 @@ export default function MarketsPage() {
 
   // Error state
   if (error) {
-    return <MarketError error={error} onRetry={() => window.location.reload()} />;
+    return <MarketError error={error} onRetry={() => {
+      refetchActiveMarkets();
+    }} />;
   }
 
   return (
@@ -75,15 +61,7 @@ export default function MarketsPage() {
               </p>
             </div>
 
-            <Button
-              asChild
-              className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg border-0"
-            >
-              <Link href="/dashboard/create">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Market
-              </Link>
-            </Button>
+            {/* Create market button removed - admin only access */}
           </div>
 
           {/* Platform Statistics */}
@@ -199,17 +177,7 @@ export default function MarketsPage() {
                     ? "No markets have been created yet"
                     : "No markets match your search criteria"}
                 </p>
-                {markets.length === 0 && (
-                  <Button
-                    asChild
-                    className="bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg"
-                  >
-                    <Link href="/dashboard/create">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create First Market
-                    </Link>
-                  </Button>
-                )}
+                {/* Create first market button removed - admin only access */}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

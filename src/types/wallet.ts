@@ -1,1 +1,28 @@
-﻿// src/types/wallet.ts`n// Wallet and blockchain-related type definitions`n`nexport interface WalletState {`n  isConnected: boolean;`n  address: string | null;`n  balance: number;`n  isLoading: boolean;`n  error: string | null;`n  walletProvider: WalletProvider | null;`n}`n`nexport interface WalletProvider {`n  name: string;`n  icon: string;`n  id: string;`n  type: 'extension' | 'mobile' | 'hardware';`n  supported: boolean;`n}`n`nexport interface ConnectedWallet {`n  address: string;`n  balance: number;`n  provider: WalletProvider;`n  capabilities: WalletCapabilities;`n}`n`nexport interface WalletCapabilities {`n  signTransactions: boolean;`n  signMessages: boolean;`n  multiSign: boolean;`n  hardwareWallet: boolean;`n}`n`n// Transaction types`nexport interface TransactionStatus {`n  status: 'pending' | 'sealed' | 'executed' | 'failed';`n  txId: string;`n  errorMessage?: string;`n  events?: FlowEvent[];`n  blockId?: string;`n  blockHeight?: number;`n}`n`nexport interface TransactionRequest {`n  cadence: string;`n  args: FlowArgument[];`n  gasLimit: number;`n  proposer?: string;`n  authorizers?: string[];`n  payer?: string;`n}`n`nexport interface FlowArgument {`n  value: any;`n  type: string;`n}`n`nexport interface FlowEvent {`n  type: string;`n  transactionId: string;`n  transactionIndex: number;`n  eventIndex: number;`n  data: any;`n}`n`n// Specific transaction types for Credit Predict`nexport interface BuySharesTransaction {`n  marketId: number;`n  isOptionA: boolean;`n  amount: number;`n}`n`nexport interface CreateMarketTransaction {`n  question: string;`n  optionA: string;`n  optionB: string;`n  category: number; // enum value`n  imageURI: string;`n  duration: number;`n  isBreakingNews: boolean;`n  minBet: number;`n  maxBet: number;`n}`n`nexport interface ResolveMarketTransaction {`n  marketId: number;`n  outcome: number; // enum value`n}`n`nexport interface ClaimWinningsTransaction {`n  marketId: number;`n}`n`n// Script query types`nexport interface ScriptRequest {`n  cadence: string;`n  args: FlowArgument[];`n}`n`nexport interface ScriptResult<T = any> {`n  success: boolean;`n  data?: T;`n  error?: string;`n}`n`n// Wallet connection flow`nexport interface WalletConnectionRequest {`n  provider: WalletProvider;`n  redirectUrl?: string;`n}`n`nexport interface WalletConnectionResponse {`n  success: boolean;`n  address?: string;`n  error?: string;`n  signature?: string;`n}`n`n// Account information`nexport interface FlowAccount {`n  address: string;`n  balance: number;`n  keys: FlowAccountKey[];`n  contracts: { [name: string]: FlowContract };`n  storage: {`n    used: number;`n    available: number;`n  };`n}`n`nexport interface FlowAccountKey {`n  index: number;`n  publicKey: string;`n  signAlgo: number;`n  hashAlgo: number;`n  weight: number;`n  sequenceNumber: number;`n  revoked: boolean;`n}`n`nexport interface FlowContract {`n  name: string;`n  code: string;`n}`n`n// Transaction history`nexport interface TransactionHistoryItem {`n  id: string;`n  txId: string;`n  type: 'buy_shares' | 'create_market' | 'resolve_market' | 'claim_winnings' | 'other';`n  status: TransactionStatus['status'];`n  timestamp: number;`n  amount?: number;`n  marketId?: number;`n  marketQuestion?: string;`n  option?: 'A' | 'B';`n  gasUsed: number;`n  fees: number;`n  blockHeight?: number;`n  errorMessage?: string;`n}`n`n// Wallet security`nexport interface WalletSecurity {`n  requireConfirmation: boolean;`n  sessionTimeout: number; // in minutes`n  autoLock: boolean;`n  biometricEnabled?: boolean;`n  pinEnabled?: boolean;`n}`n`n// Multi-signature support`nexport interface MultiSigProposal {`n  id: string;`n  proposer: string;`n  transaction: TransactionRequest;`n  signatures: MultiSigSignature[];`n  requiredSignatures: number;`n  status: 'pending' | 'approved' | 'executed' | 'rejected';`n  createdAt: number;`n  expiresAt: number;`n}`n`nexport interface MultiSigSignature {`n  signer: string;`n  signature: string;`n  timestamp: number;`n}`n`n// Wallet errors`nexport interface WalletError {`n  code: string;`n  message: string;`n  details?: any;`n}`n`nexport const WalletErrorCodes = {`n  USER_REJECTED: 'USER_REJECTED',`n  NETWORK_ERROR: 'NETWORK_ERROR',`n  INSUFFICIENT_FUNDS: 'INSUFFICIENT_FUNDS',`n  TRANSACTION_FAILED: 'TRANSACTION_FAILED',`n  UNSUPPORTED_METHOD: 'UNSUPPORTED_METHOD',`n  WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',`n  CONNECTION_FAILED: 'CONNECTION_FAILED',`n  INVALID_ADDRESS: 'INVALID_ADDRESS',`n  GAS_LIMIT_EXCEEDED: 'GAS_LIMIT_EXCEEDED',`n} as const;`n`nexport type WalletErrorCode = typeof WalletErrorCodes[keyof typeof WalletErrorCodes];
+﻿export interface WalletState {
+  address: string | null;
+  isConnected: boolean;
+  isConnecting: boolean;
+  balance: string;
+  chainId?: number;
+}
+
+export interface TransactionStatus {
+  status: 'pending' | 'success' | 'failed';
+  txId: string;
+  errorMessage?: string;
+  blockHeight?: number;
+}
+
+export interface TransactionRequest {
+  to: string;
+  data: string;
+  value?: string;
+  gasLimit?: number;
+}
+
+export interface ContractEvent {
+  name: string;
+  args: Record<string, any>;
+  blockNumber: number;
+  transactionHash: string;
+}

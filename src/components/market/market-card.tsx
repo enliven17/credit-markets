@@ -1,18 +1,20 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @next/next/no-img-element */
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Market, MarketStatus } from "@/types/market";
 import {
-  Market,
-  MarketCategory,
-  MarketCategoryLabels,
-  MarketStatus
-} from "@/types/market";
-import { Clock, ExternalLink, Flame, TrendingUp, Users2, Image as ImageIcon } from "lucide-react";
+  Calendar,
+  CheckCircle,
+  Clock,
+  Image as ImageIcon,
+  Pause,
+  TrendingUp,
+  Users,
+  Volume2,
+} from "lucide-react";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
-import { getOptimizedImageUrl, isValidImageUrl, extractImageFromMarket } from "@/lib/flow/market";
+import React, { useState } from "react";
 
 interface MarketCardProps {
   market: Market;
@@ -24,29 +26,8 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   className = "",
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
-  const [extractedImageURI, setExtractedImageURI] = useState<string | undefined>();
-  const [isImageHovered, setIsImageHovered] = useState(false);
 
-  // Extract image from description field if not in imageURI
-  useEffect(() => {
-    // If no imageURI in market object, try extracting from description
-    if (!market.imageURI && market.description) {
-      const { imageURI } = extractImageFromMarket(market.description);
-      if (imageURI) {
-        setExtractedImageURI(imageURI);
-      }
-    } else {
-      setExtractedImageURI(market.imageURI);
-    }
-  }, [market]);
-
-  // Use extracted image URI or fallback to market.imageURI
-  const finalImageURI = (market as any).imageUrl;
-  
-  // Get optimized image URL - smaller size for compact display
-  const optimizedImageUrl = getOptimizedImageUrl(finalImageURI, 120, 120);
-  const hasValidImage = isValidImageUrl(optimizedImageUrl) && !imageError;
+  const hasValidImage = market.imageURI && !imageError;
 
   // Calculate percentages for odds
   const totalShares =
@@ -56,254 +37,183 @@ export const MarketCard: React.FC<MarketCardProps> = ({
     totalShares > 0
       ? (parseFloat(market.totalOptionAShares) / totalShares) * 100
       : 50;
-  const optionBPercentage =
-    totalShares > 0
-      ? (parseFloat(market.totalOptionBShares) / totalShares) * 100
-      : 50;
+  const optionBPercentage = 100 - optionAPercentage;
 
-  // Format odds like Polymarket (e.g., 67¢)
-  const formatOdds = (percentage: number) => {
-    return `${Math.round(percentage)}% `;
+  // Compute the actual display status based on contract status and end time
+  const getActualMarketStatus = () => {
+    const now = Date.now();
+    const endTime = parseInt(market.endTime) * 1000;
+
+    // If resolved, always show resolved
+    if (market.status === MarketStatus.Resolved || market.resolved) {
+      return MarketStatus.Resolved;
+    }
+
+    // If past end time but not resolved, it's pending resolution
+    if (endTime <= now && market.status === MarketStatus.Active) {
+      return MarketStatus.Paused; // Using Paused to represent "Pending Resolution"
+    }
+
+    // Otherwise use contract status
+    return market.status;
   };
 
-  // Calculate volume (approximation)
-  const volume = parseFloat(market.totalPool);
-  const formatVolume = (vol: number) => {
-    if (vol >= 1000000) return `${(vol / 1000000).toFixed(1)}M`;
-    if (vol >= 1000) return `${(vol / 1000).toFixed(0)}K`;
-    return `${vol.toFixed(0)}`;
+  const actualStatus = getActualMarketStatus();
+
+  const formatCurrency = (value: string | number) => {
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toFixed(2);
   };
 
-  // Time remaining calculation
-  const getTimeRemaining = () => {
-    const endTime = new Date(parseFloat(market.endTime) * 1000);
-    const now = new Date();
-    const diff = endTime.getTime() - now.getTime();
+  const formatTimeRemaining = (endTime: string) => {
+    const now = Date.now();
+    const end = parseInt(endTime) * 1000;
+    const diff = end - now;
 
     if (diff <= 0) return "Ended";
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-    if (days > 0) return `${days}d`;
+    if (days > 0) return `${days}d ${hours}h`;
     if (hours > 0) return `${hours}h`;
-    return `${minutes}m`;
+    return "< 1h";
   };
-
-  // Category color mapping for dark theme
-  const getCategoryColor = (category: MarketCategory) => {
-    switch (category) {
-      case MarketCategory.Politics:
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case MarketCategory.Sports:
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case MarketCategory.Economics:
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      case MarketCategory.Technology:
-        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
-      case MarketCategory.Entertainment:
-        return "bg-pink-500/20 text-pink-400 border-pink-500/30";
-      case MarketCategory.Crypto:
-        return "bg-orange-500/20 text-orange-400 border-orange-500/30";
-      case MarketCategory.Weather:
-        return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
-      case MarketCategory.BreakingNews:
-        return "bg-red-500/20 text-red-400 border-red-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
-    }
-  };
-
-  const handleImageLoad = () => {
-    setImageLoading(false);
-  };
-
-  const handleImageError = () => {
-    setImageError(true);
-    setImageLoading(false);
-  };
-
-  const isActive = market.status === MarketStatus.Active;
-  const timeRemaining = getTimeRemaining();
-  const isHot = volume > 1000; // Consider markets with >1000 tCTC as "hot"
-  const isEndingSoon = isActive && timeRemaining !== "Ended" && (
-    timeRemaining.includes('h') || timeRemaining.includes('m')
-  );
 
   return (
-    <Card
-      className={`group hover:shadow-xl hover:shadow-[#22c55e]/10 transition-all duration-300 border-gray-800/50 hover:border-[#22c55e]/30 bg-gradient-to-br from-[#1A1F2C] to-[#151923] backdrop-blur-sm hover:scale-[1.02] ${className}`}
-    >
-      <CardContent className="p-0">
-        <Link href={`/markets/${market.id}`} className="block">
-          {/* Header with compact image */}
-          <div className="p-3 pb-2">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {/* Compact rounded image */}
-                <div
-                  className="relative w-12 h-12 flex-shrink-0"
-                  onMouseEnter={() => setIsImageHovered(true)}
-                  onMouseLeave={() => setIsImageHovered(false)}
-                >
-                  {hasValidImage ? (
-                    <>
-                      {imageLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 rounded-lg">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#22c55e]"></div>
-                        </div>
-                      )}
-                      <img
-                        src={(market as any).imageUrl}
-                        alt={market.title}
-                        className={`w-full h-full object-cover rounded-lg transition-all duration-300 group-hover:scale-105 ${
-                          imageLoading ? 'opacity-0' : 'opacity-100'
-                        }`}
-                        onLoad={handleImageLoad}
-                        onError={handleImageError}
-                        loading="lazy"
-                      />
-                      {/* Pop-over */}
-                      {isImageHovered && (
-                        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-32 h-32 z-10">
-                          <img
-                            src={finalImageURI}
-                            alt={market.title}
-                            className="w-full h-full object-cover shadow-lg border border-gray-700"
-                          />
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    // Compact rounded placeholder
-                    <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg flex items-center justify-center border border-gray-700/50">
-                      <ImageIcon className="h-5 w-5 text-gray-600" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <Badge
-                    variant="outline"
-                    className={`text-xs font-medium px-2 py-0.5 border ${getCategoryColor(market.category)}`}
-                  >
-                    {MarketCategoryLabels[market.category as keyof typeof MarketCategoryLabels]}
-                  </Badge>
-                  
-                  {/* Hot indicator */}
-                  {isHot && (
-                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-xs">
-                      <Flame className="h-2.5 w-2.5" />
-                    </div>
-                  )}
-                </div>
+    <Link href={`/markets/${market.id}`} className={`block ${className}`}>
+      <Card className="group bg-gradient-to-br from-[#1A1F2C] to-[#151923] border-gray-800/50 shadow-xl hover:shadow-2xl hover:shadow-[#22c55e]/10 transition-all duration-300 hover:scale-[1.02] hover:border-[#22c55e]/30 overflow-hidden">
+        <CardContent className="p-0">
+          {/* Image Section */}
+          <div className="relative h-48 overflow-hidden">
+            {hasValidImage ? (
+              <img
+                src={market.imageURI}
+                alt={market.title}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-gray-800/50 to-gray-900/50 flex items-center justify-center">
+                <ImageIcon className="h-16 w-16 text-gray-600" />
               </div>
-
-              {isActive && (
-                <div className={`flex items-center text-xs px-1.5 py-0.5 rounded-full ${
-                  isEndingSoon 
-                    ? "bg-red-500/20 text-red-400 border border-red-500/30" 
-                    : "bg-gray-700/50 text-gray-400"
-                }`}>
-                  <Clock className="h-2.5 w-2.5 mr-1" />
-                  {timeRemaining}
+            )}
+            
+            {/* Status Badge Overlay */}
+            <div className="absolute top-3 left-3">
+              <Badge
+                variant={actualStatus === MarketStatus.Active ? "default" : "secondary"}
+                className={
+                  actualStatus === MarketStatus.Active
+                    ? "bg-green-500/90 text-white border-0 backdrop-blur-sm"
+                    : actualStatus === MarketStatus.Resolved
+                    ? "bg-blue-500/90 text-white border-0 backdrop-blur-sm"
+                    : "bg-orange-500/90 text-white border-0 backdrop-blur-sm"
+                }
+              >
+                <div className="flex items-center space-x-1">
+                  {actualStatus === MarketStatus.Active && <TrendingUp className="h-3 w-3" />}
+                  {actualStatus === MarketStatus.Paused && <Pause className="h-3 w-3" />}
+                  {actualStatus === MarketStatus.Resolved && <CheckCircle className="h-3 w-3" />}
+                  <span className="text-xs font-medium">
+                    {actualStatus === MarketStatus.Active
+                      ? "Active"
+                      : actualStatus === MarketStatus.Resolved
+                      ? "Resolved"
+                      : "Pending"}
+                  </span>
                 </div>
-              )}
+              </Badge>
             </div>
 
-            <h3 className="font-semibold text-white text-sm leading-5 line-clamp-2 group-hover:text-gray-100 mb-2">
+            {/* Category Badge */}
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30 backdrop-blur-sm text-xs">
+                Category {market.category}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Content Section */}
+          <div className="p-6 space-y-4">
+            {/* Title */}
+            <h3 className="text-lg font-bold text-white leading-tight line-clamp-2 group-hover:text-[#22c55e] transition-colors duration-200">
               {market.title}
             </h3>
 
+            {/* Description */}
+            <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
+              {market.description}
+            </p>
+
+            {/* Options Progress */}
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm font-medium">
+                <span className="text-[#22c55e] truncate flex-1 mr-2">
+                  {market.optionA} {optionAPercentage.toFixed(1)}%
+                </span>
+                <span className="text-gray-400 truncate flex-1 text-right">
+                  {market.optionB} {optionBPercentage.toFixed(1)}%
+                </span>
+              </div>
+              <Progress
+                value={optionAPercentage}
+                className="h-2 bg-gray-800 rounded-full overflow-hidden"
+              />
+            </div>
+
             {/* Market Stats */}
-            <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
-              <div className="flex items-center gap-1 px-1.5 py-1 bg-[#0A0C14]/50 rounded">
-                <TrendingUp className="h-3 w-3 text-[#22c55e]" />
-                <span className="font-medium">{formatVolume(volume)}</span>
+            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-800/50">
+              <div className="flex items-center space-x-2 text-xs text-gray-400">
+                <Volume2 className="h-3 w-3 text-green-400" />
+                <span>{formatCurrency(market.totalPool)} tCTC</span>
               </div>
-              <div className="flex items-center gap-1 px-1.5 py-1 bg-[#0A0C14]/50 rounded">
-                <Users2 className="h-3 w-3 text-[#22c55e]" />
-                <span className="font-medium">{Math.ceil(totalShares / 100)}</span>
-              </div>
-            </div>
-
-            {/* Options */}
-            <div className="space-y-2 mb-3">
-              {/* Option A */}
-              <div className="flex items-center justify-between p-2.5 rounded-lg border border-gray-700/50 hover:border-green-500/50 hover:bg-green-500/5 transition-all duration-200 group/option">
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-white truncate group-hover/option:text-green-100">
-                    {market.optionA}
-                  </div>
-                </div>
-                <div className="ml-2 flex items-center gap-1">
-                  <div
-                    className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
-                      optionAPercentage > 50
-                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                        : "bg-gray-700/50 text-gray-300"
-                    }`}
-                  >
-                    {formatOdds(optionAPercentage)}
-                  </div>
-                  {optionAPercentage > optionBPercentage && (
-                    <TrendingUp className="h-2.5 w-2.5 text-green-400" />
-                  )}
-                </div>
-              </div>
-
-              {/* Option B */}
-              <div className="flex items-center justify-between p-2.5 rounded-lg border border-gray-700/50 hover:border-red-500/50 hover:bg-red-500/5 transition-all duration-200 group/option">
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-white truncate group-hover/option:text-red-100">
-                    {market.optionB}
-                  </div>
-                </div>
-                <div className="ml-2 flex items-center gap-1">
-                  <div
-                    className={`px-2 py-1 rounded text-xs font-bold transition-colors ${
-                      optionBPercentage > 50
-                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                        : "bg-gray-700/50 text-gray-300"
-                    }`}
-                  >
-                    {formatOdds(optionBPercentage)}
-                  </div>
-                  {optionBPercentage > optionAPercentage && (
-                    <TrendingUp className="h-2.5 w-2.5 text-green-400" />
-                  )}
-                </div>
+              <div className="flex items-center space-x-2 text-xs text-gray-400">
+                <Clock className="h-3 w-3 text-yellow-400" />
+                <span>{formatTimeRemaining(market.endTime)}</span>
               </div>
             </div>
 
-            {/* Footer */}
+            {/* Creator Info */}
             <div className="flex items-center justify-between pt-2 border-t border-gray-800/50">
-              <div className="text-xs text-gray-400">
-                {market.resolved ? (
-                  <span className="font-medium text-gray-300 flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                    Resolved
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 bg-[#22c55e] rounded-full animate-pulse"></div>
-                    {parseFloat(market.totalPool).toFixed(0)} tCTC
-                  </span>
-                )}
+              <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <Users className="h-3 w-3" />
+                <span>
+                  {market.creator.slice(0, 6)}...{market.creator.slice(-4)}
+                </span>
               </div>
-
-              <Button
-                size="sm"
-                className="h-6 px-3 text-xs bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                <ExternalLink className="h-2.5 w-2.5 mr-1" />
-                Trade
-              </Button>
+              <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <Calendar className="h-3 w-3" />
+                <span>
+                  {new Date(parseInt(market.createdAt) * 1000).toLocaleDateString()}
+                </span>
+              </div>
             </div>
+
+            {/* Resolved Outcome */}
+            {actualStatus === MarketStatus.Resolved && market.outcome !== undefined && (
+              <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-blue-400" />
+                  <span className="text-blue-400 font-medium text-sm">
+                    Winner: {market.outcome === 0 ? market.optionA : market.optionB}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Action Button */}
+            <Button
+              className="w-full bg-gradient-to-r from-[#22c55e] to-[#16a34a] hover:from-[#16a34a] hover:to-[#15803d] text-white shadow-lg group-hover:shadow-[#22c55e]/25 transition-all duration-200"
+              size="sm"
+            >
+              {actualStatus === MarketStatus.Active ? "Trade Now" : "View Details"}
+            </Button>
           </div>
-        </Link>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };

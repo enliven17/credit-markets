@@ -11,12 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMarketDetail } from "@/hooks/use-market-detail";
-import {
-  extractImageFromMarket,
-  getOptimizedImageUrl,
-  isValidImageUrl,
-} from "@/lib/flow/market";
+import { usePredictionContractRead } from "@/hooks/use-prediction-contract";
 import { useAccount } from "wagmi";
 import { MarketStatus } from "@/types/market";
 import {
@@ -43,16 +38,17 @@ export default function MarketDetailPage() {
   const marketId = params.id as string;
   const { address } = useAccount();
 
-  const {
-    market,
-    trades,
-    comments,
-    priceHistory,
-    userPosition,
-    loading,
-    error,
-    refreshMarketData,
-  } = useMarketDetail(marketId, address || "");
+  // Use contract hooks for real data
+  const { getMarket, getUserPosition } = usePredictionContractRead();
+  const { market, isLoading: marketLoading, refetch: refetchMarket } = getMarket(marketId);
+  const { position: userPosition, isLoading: positionLoading, refetch: refetchPosition } = getUserPosition(address || "", marketId);
+
+  const loading = marketLoading || positionLoading;
+  const error = null;
+  
+  // Mock data for development
+  const trades: any[] = [];
+  const comments: any[] = [];
 
   const [betDialogOpen, setBetDialogOpen] = useState(false);
   const [selectedSide, setSelectedSide] = useState<"optionA" | "optionB">("optionA");
@@ -64,12 +60,13 @@ export default function MarketDetailPage() {
     if (!loading && market) {
       const interval = setInterval(() => {
         console.log("Auto-refreshing market data...");
-        refreshMarketData();
+        refetchMarket();
+        refetchPosition();
       }, 30000);
 
       return () => clearInterval(interval);
     }
-  }, [loading, market, refreshMarketData]);
+  }, [loading, market, refetchMarket, refetchPosition]);
 
   // Loading state
   if (loading) {
@@ -81,19 +78,17 @@ export default function MarketDetailPage() {
     return (
       <MarketError
         error={error || "Market not found"}
-        onRetry={refreshMarketData}
+        onRetry={() => {
+          refetchMarket();
+          refetchPosition();
+        }}
       />
     );
   }
 
   // Extract image from market data
-  const finalImageURI =
-    market.imageURI ||
-    (market.description
-      ? extractImageFromMarket(market.description).imageURI
-      : undefined);
-  const optimizedImageUrl = getOptimizedImageUrl(finalImageURI, 800, 400);
-  const hasValidImage = isValidImageUrl(optimizedImageUrl) && !imageError;
+  const finalImageURI = market.imageURI;
+  const hasValidImage = finalImageURI && !imageError;
 
   const totalShares =
     parseFloat(market.totalOptionAShares) +
@@ -146,7 +141,9 @@ export default function MarketDetailPage() {
   const handleBetSuccess = () => {
     setBetDialogOpen(false);
     setTimeout(() => {
-      refreshMarketData();
+      // Refresh contract data
+      refetchMarket();
+      refetchPosition();
     }, 2000);
   };
 
@@ -161,7 +158,7 @@ export default function MarketDetailPage() {
               <div className="relative w-16 h-16 flex-shrink-0">
                 {hasValidImage ? (
                   <img
-                    src={(market as any).imageUrl || optimizedImageUrl}
+                    src={finalImageURI}
                     alt={market.title}
                     className="w-full h-full object-cover rounded-xl"
                     onError={() => setImageError(true)}

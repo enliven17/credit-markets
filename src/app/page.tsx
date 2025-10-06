@@ -1,68 +1,39 @@
 ﻿/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { OwnerOnly } from "@/components/auth/owner-only";
-import { StatsCards } from "@/components/dashboard/stat-cards";
 import { MarketCard } from "@/components/market/market-card";
 import { Button } from "@/components/ui/button";
-import { fetchMarketsData } from "@/lib/flow/market-api";
-import {
-    calculatePlatformStats,
-    processFeaturedMarkets,
-} from "@/lib/flow/market-data";
-import { Market } from "@/types/market";
+import { usePredictionContractRead } from "@/hooks/use-prediction-contract";
 import { ArrowRight, TrendingUp, BarChart3, Activity, Coins, Users } from "lucide-react";
 import { formatCompactCurrency } from "@/lib/constants";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import CountUp from "react-countup";
 
 export default function HomePage() {
-    const [activeMarkets, setActiveMarkets] = useState<Market[]>([]);
-    const [allMarkets, setAllMarkets] = useState<Market[]>([]);
-    const [featuredMarkets, setFeaturedMarkets] = useState<Market[]>([]);
-    const [marketsLoading, setMarketsLoading] = useState(true);
-    const [marketsError, setMarketsError] = useState<string | null>(null);
+    // Use contract hooks for real data
+    const { activeMarkets, allMarkets, activeMarketsLoading, allMarketsLoading } = usePredictionContractRead();
+    
+    const marketsLoading = activeMarketsLoading || allMarketsLoading;
+    const marketsError = null;
+    const featuredMarkets = activeMarkets.slice(0, 3); // Show first 3 as featured
 
-    // Handle markets data fetching using market-api
-    const handleFetchMarkets = async () => {
-        try {
-            setMarketsLoading(true);
-            setMarketsError(null);
+    // No need for useEffect with contract hooks
 
-            console.log("🚀 Fetching markets using market-api...");
-            const { activeMarketsData, allMarketsData } = await fetchMarketsData();
+    // Calculate platform stats
+    const platformStats = React.useMemo(() => {
+        const totalVolume = allMarkets.reduce((sum, market) => sum + parseFloat(market.totalPool || "0"), 0);
+        const totalUsers = new Set(allMarkets.map(m => m.creator)).size;
+        
+        return {
+            totalVolume,
+            totalUsers,
+            activeMarkets: activeMarkets.length,
+            totalMarkets: allMarkets.length,
+        };
+    }, [allMarkets, activeMarkets]);
 
-            setActiveMarkets(activeMarketsData);
-            setAllMarkets(allMarketsData);
-        } catch (err) {
-            console.error("❌ Error fetching markets:", err);
-            setMarketsError(
-                err instanceof Error ? err.message : "Failed to fetch markets",
-            );
-        } finally {
-            setMarketsLoading(false);
-        }
-    };
-
-    // Fetch markets when component mounts
-    useEffect(() => {
-        handleFetchMarkets();
-    }, []);
-
-    // Process featured markets when active markets change
-    useEffect(() => {
-        const featured = processFeaturedMarkets(activeMarkets, 6);
-        setFeaturedMarkets(featured);
-    }, [activeMarkets]);
-
-    // Calculate platform stats using market-data functions
-    const platformStats = React.useMemo(
-        () => calculatePlatformStats(allMarkets, activeMarkets),
-        [allMarkets, activeMarkets],
-    );
-
-    console.log("🏯 HomePage state (using market-api):", {
+    console.log("🏯 HomePage state (using contract hooks):", {
         marketsLoading,
         marketsError,
         activeMarketsCount: activeMarkets.length,
@@ -262,10 +233,10 @@ export default function HomePage() {
                             </h3>
                             <p className="text-gray-400 mb-2">{marketsError}</p>
                             <p className="text-xs text-gray-500 mb-4">
-                                Check console for market-api debugging info
+                                Check console for contract debugging info
                             </p>
                             <Button
-                                onClick={handleFetchMarkets}
+                                onClick={() => window.location.reload()}
                                 variant="outline"
                                 className="mt-4 border-[#22c55e] text-[#22c55e] hover:bg-[#22c55e] hover:text-white"
                             >
@@ -282,23 +253,10 @@ export default function HomePage() {
                             </h3>
                             <p className="text-gray-400 mb-4">
                                 {allMarkets.length === 0
-                                    ? "No markets have been created yet. Be the first to create a prediction market!"
-                                    : "All markets are currently inactive or resolved. Create a new market to get started!"}
+                                    ? "No markets are currently available. Check back soon for new prediction markets!"
+                                    : "All markets are currently inactive or resolved. Check back soon for new markets!"}
                             </p>
-                            <OwnerOnly showFallback={false}>
-                                <Button
-                                    asChild
-                                    style={{ backgroundColor: "#22c55e", color: "white" }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = "#16a34a";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = "#22c55e";
-                                    }}
-                                >
-                                    <Link href="/admin/create">Create New Market</Link>
-                                </Button>
-                            </OwnerOnly>
+                            {/* Create market button removed - admin only access via /dashboard/create */}
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
