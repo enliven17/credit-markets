@@ -11,7 +11,7 @@ import {
   Pause,
   TrendingUp,
   Users,
-  Volume2,
+  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -167,7 +167,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
             {/* Market Stats */}
             <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-800/50">
               <div className="flex items-center space-x-2 text-xs text-gray-400">
-                <Volume2 className="h-3 w-3 text-green-400" />
+                <DollarSign className="h-3 w-3 text-green-400" />
                 <span>{formatCurrency(market.totalPool)} tCTC</span>
               </div>
               <div className="flex items-center space-x-2 text-xs text-gray-400">

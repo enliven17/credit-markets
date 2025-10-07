@@ -23,11 +23,23 @@ export default function MarketsPage() {
   const [activeTab, setActiveTab] = useState("active");
   
   // Use contract hooks for real data
-  const { activeMarkets, activeMarketsLoading, refetchActiveMarkets } = usePredictionContractRead();
+  const { activeMarkets, allMarkets, activeMarketsLoading, allMarketsLoading, refetchActiveMarkets, refetchAllMarkets } = usePredictionContractRead();
   
-  const markets = activeMarkets;
-  const loading = activeMarketsLoading;
+  const loading = activeMarketsLoading || allMarketsLoading;
   const error = null;
+  
+  // Filter markets based on active tab
+  const getMarketsForTab = () => {
+    if (activeTab === "active") {
+      return activeMarkets;
+    } else if (activeTab === "resolved") {
+      return allMarkets.filter(market => market.resolved);
+    } else {
+      return allMarkets; // "all" tab
+    }
+  };
+  
+  const markets = getMarketsForTab();
 
   const filteredMarkets = markets.filter(market =>
     market.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -43,6 +55,7 @@ export default function MarketsPage() {
   if (error) {
     return <MarketError error={error} onRetry={() => {
       refetchActiveMarkets();
+      refetchAllMarkets();
     }} />;
   }
 
@@ -145,7 +158,7 @@ export default function MarketsPage() {
 
         {/* Markets Grid */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="w-full bg-[#1A1F2C] border border-gray-800/50 rounded-xl p-1 h-auto">
+          <TabsList className="w-full bg-[#1A1F2C] border border-gray-800/50 rounded-xl p-1 h-auto grid grid-cols-3">
             <TabsTrigger
               value="active"
               className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
@@ -157,7 +170,39 @@ export default function MarketsPage() {
                   variant="secondary"
                   className="bg-gray-700/50 text-gray-300 border-0 text-xs px-2 py-0.5"
                 >
-                  {filteredMarkets.length}
+                  {activeMarkets.length}
+                </Badge>
+              </div>
+            </TabsTrigger>
+            
+            <TabsTrigger
+              value="resolved"
+              className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
+            >
+              <div className="flex items-center gap-2">
+                <Timer className="h-4 w-4" />
+                <span>Resolved</span>
+                <Badge
+                  variant="secondary"
+                  className="bg-gray-700/50 text-gray-300 border-0 text-xs px-2 py-0.5"
+                >
+                  {allMarkets.filter(m => m.resolved).length}
+                </Badge>
+              </div>
+            </TabsTrigger>
+            
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
+            >
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                <span>All</span>
+                <Badge
+                  variant="secondary"
+                  className="bg-gray-700/50 text-gray-300 border-0 text-xs px-2 py-0.5"
+                >
+                  {allMarkets.length}
                 </Badge>
               </div>
             </TabsTrigger>

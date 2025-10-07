@@ -26,7 +26,7 @@ import {
   Share2,
   TrendingUp,
   Users,
-  Volume2,
+  DollarSign,
   Zap,
   Activity,
 } from "lucide-react";
@@ -281,11 +281,13 @@ export default function MarketDetailPage() {
 
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-yellow-400" />
-              <CountdownTimer endTime={parseInt(market.endTime) * 1000} />
+              <span className="text-gray-400">
+                <CountdownTimer endTime={parseInt(market.endTime) * 1000} />
+              </span>
             </div>
 
             <div className="flex items-center space-x-2">
-              <Volume2 className="h-4 w-4 text-green-400" />
+              <DollarSign className="h-4 w-4 text-green-400" />
               <span>{formatCurrency(market.totalPool)} tCTC volume</span>
             </div>
           </div>
@@ -536,16 +538,23 @@ export default function MarketDetailPage() {
                       : "Pending Resolution"}
                   </Badge>
                   {actualStatus === MarketStatus.Active && (
-                    <div className="text-center bg-gray-800/30 rounded-lg p-4">
+                    <div className="text-center bg-gray-800/30 rounded-lg p-4 text-white">
                       <CountdownTimer endTime={parseInt(market.endTime) * 1000} />
                     </div>
                   )}
                   
-                  {/* Admin Controls - Only show if market ended but not resolved */}
+                  {/* Admin Controls - Show for admin if not resolved */}
                   <OwnerOnly showFallback={false}>
-                    {actualStatus === MarketStatus.Paused && !market.resolved && (
+                    {!market.resolved && (
                       <div className="space-y-3 pt-4 border-t border-gray-800/50">
-                        <h5 className="text-sm font-semibold text-gray-300 text-center">Admin: Resolve Market</h5>
+                        <h5 className="text-sm font-semibold text-gray-300 text-center">
+                          Admin: Resolve Market
+                          {actualStatus === MarketStatus.Active && (
+                            <span className="block text-xs text-yellow-400 mt-1">
+                              (Market still active - for testing)
+                            </span>
+                          )}
+                        </h5>
                         <div className="grid grid-cols-2 gap-2">
                           <Button
                             onClick={() => handleResolveMarket(0)}
