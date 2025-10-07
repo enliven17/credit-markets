@@ -21,13 +21,13 @@ import { useEffect, useState } from "react";
 export default function MarketsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("active");
-  
+
   // Use contract hooks for real data
   const { activeMarkets, allMarkets, activeMarketsLoading, allMarketsLoading, refetchActiveMarkets, refetchAllMarkets } = usePredictionContractRead();
-  
+
   const loading = activeMarketsLoading || allMarketsLoading;
   const error = null;
-  
+
   // Filter markets based on active tab
   const getMarketsForTab = () => {
     if (activeTab === "active") {
@@ -38,7 +38,7 @@ export default function MarketsPage() {
       return allMarkets; // "all" tab
     }
   };
-  
+
   const markets = getMarketsForTab();
 
   const filteredMarkets = markets.filter(market =>
@@ -60,7 +60,7 @@ export default function MarketsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0C14]">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -174,7 +174,7 @@ export default function MarketsPage() {
                 </Badge>
               </div>
             </TabsTrigger>
-            
+
             <TabsTrigger
               value="resolved"
               className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"
@@ -190,7 +190,7 @@ export default function MarketsPage() {
                 </Badge>
               </div>
             </TabsTrigger>
-            
+
             <TabsTrigger
               value="all"
               className="data-[state=active]:bg-[#22c55e] data-[state=active]:text-white text-gray-400 hover:text-white transition-all duration-200 rounded-lg py-3 px-4 font-medium"

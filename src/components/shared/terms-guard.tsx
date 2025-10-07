@@ -78,7 +78,7 @@ export function TermsGuard({ children }: TermsGuardProps) {
   // Show loading state while checking region
   if (isLoadingRegion) {
     return (
-      <div className="min-h-screen bg-[#0A0C14] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#22c55e] to-[#16a34a] blur-md opacity-70"></div>
           <div className="absolute inset-0 rounded-full bg-[#0A0C14]"></div>

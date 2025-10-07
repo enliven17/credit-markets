@@ -44,9 +44,9 @@ export default function HomePage() {
     console.log("This is the Featured Markets", featuredMarkets);
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-[#0A0C14] via-[#1A1F2C] to-[#0A0C14]">
+        <div className="min-h-screen">
             {/* Hero Section - Banner Style */}
-            <section className="w-full h-[500px] relative overflow-hidden bg-gradient-to-r from-[#0A0C14] via-[#1A1F2C] to-[#0A0C14]">
+            <section className="w-full h-[500px] relative overflow-hidden">
                 {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-5">
                     <div
@@ -120,7 +120,7 @@ export default function HomePage() {
             </section>
 
             {/* Platform Stats */}
-            <section className="py-16 px-4 bg-[#0A0C14]">
+            <section className="py-16 px-4">
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
                         {/* Total Markets */}
@@ -183,7 +183,7 @@ export default function HomePage() {
             </section>
 
             {/* Featured Markets Section */}
-            <section className="py-16 px-4 bg-[#0A0C14]">
+            <section className="py-16 px-4">
                 <div className="container mx-auto">
                     <div className="flex items-center md:justify-between mb-8 max-sm:flex-col max-sm:gap-4">
                         <div className="max-sm:text-center">

@@ -101,7 +101,7 @@ export default function CreateMarketPage() {
 
   return (
     <OwnerOnly>
-      <div className="min-h-screen bg-[#0A0C14]">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto">
             {/* Header */}

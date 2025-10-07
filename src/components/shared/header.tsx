@@ -7,7 +7,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="backdrop-blur-xl bg-[#1A1F2C]/80 rounded-3xl border border-[#16a34a]/20 p-6 shadow-2xl">
+        <div className="backdrop-blur-xl bg-gradient-to-r from-[#0A0C14]/90 via-[#1A1F2C]/90 to-[#0A0C14]/90 rounded-3xl border border-[#16a34a]/20 p-6 shadow-2xl">
           <div className="flex items-center justify-between gap-[20px]">
             <div className="flex items-center space-x-2">
               {/* Logo */}

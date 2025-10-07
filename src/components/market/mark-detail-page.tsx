@@ -159,7 +159,7 @@ export default function MarketDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0C14]">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Market Header */}
         <div className="bg-gradient-to-br from-[#1A1F2C] via-[#151923] to-[#0A0C14] rounded-2xl border border-gray-800/50 p-8 shadow-2xl">
