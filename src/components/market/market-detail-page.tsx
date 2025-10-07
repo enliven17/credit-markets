@@ -6,6 +6,7 @@ import { CountdownTimer } from "@/components/market/countdown-timer";
 import { MarketError } from "@/components/market/market-error";
 import { MarketLoading } from "@/components/market/market-loading";
 import { MarketActivity } from "@/components/market/market-activity";
+import { MyBets } from "@/components/market/my-bets";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -468,13 +469,20 @@ export default function MarketDetailPage() {
             {/* Market Details Tabs */}
             <div className="space-y-4">
               <Tabs defaultValue="bets" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-[#1A1F2C] to-[#151923] border border-gray-800/50 rounded-xl p-1 h-12">
+                <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-[#1A1F2C] to-[#151923] border border-gray-800/50 rounded-xl p-1 h-12">
                   <TabsTrigger
                     value="bets"
                     className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#22c55e] data-[state=active]:to-[#16a34a] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all duration-200 rounded-lg h-10 font-medium"
                   >
                     <Activity className="h-3 w-3 mr-1" />
                     Bets
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="my-bets"
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#22c55e] data-[state=active]:to-[#16a34a] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-white transition-all duration-200 rounded-lg h-10 font-medium"
+                  >
+                    <Zap className="h-3 w-3 mr-1" />
+                    My Bets
                   </TabsTrigger>
                   <TabsTrigger
                     value="comments"
@@ -492,6 +500,15 @@ export default function MarketDetailPage() {
                     marketTitle={market.title}
                     optionA={market.optionA}
                     optionB={market.optionB}
+                  />
+                </TabsContent>
+
+                {/* My Bets Tab Content */}
+                <TabsContent value="my-bets" className="mt-4">
+                  <MyBets
+                    marketId={market.id}
+                    userAddress={address || ""}
+                    showAllBets={false}
                   />
                 </TabsContent>
 
