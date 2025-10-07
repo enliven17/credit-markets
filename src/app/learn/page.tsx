@@ -217,13 +217,13 @@ const learnSections = [
         <p className="text-gray-300 text-sm leading-relaxed">
           <span className="font-semibold text-gray-100">Worked Example:</span>
           <br />
-          Total Pool: 1,000 tCTC | Platform Fee: 2% (20 tCTC) | Remaining Pool:
-          980 tCTC
+          Total Pool: 1,000 tCTC | Platform Fee: 2.5% (25 tCTC) | Remaining Pool:
+          975 tCTC
           <br />
           Outcome A (Winner): 400 tCTC | Outcome B (Loser): 600 tCTC
           <br />
-          Alice stakes 100 tCTC on Outcome A → Alice's share = 100 ÷ 400 = 25% →
-          Payout = 25% × 980 = 245 tCTC
+          Emma stakes 100 tCTC on Outcome A → Emma's share = 100 ÷ 400 = 25% →
+          Payout = 25% × 975 = 243.75 tCTC
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-gray-300 border-collapse">
@@ -239,31 +239,31 @@ const learnSections = [
             </thead>
             <tbody>
               <tr className="border-t border-gray-700">
-                <td className="p-2">Alice</td>
+                <td className="p-2">Emma</td>
                 <td className="p-2">100</td>
                 <td className="p-2">A (Winner)</td>
                 <td className="p-2">Win</td>
-                <td className="p-2">245.00</td>
-                <td className="p-2">+145.00</td>
+                <td className="p-2">243.75</td>
+                <td className="p-2">+143.75</td>
               </tr>
               <tr className="border-t border-gray-700">
-                <td className="p-2">Bob</td>
+                <td className="p-2">Liam</td>
                 <td className="p-2">150</td>
                 <td className="p-2">A (Winner)</td>
                 <td className="p-2">Win</td>
-                <td className="p-2">367.50</td>
-                <td className="p-2">+217.50</td>
+                <td className="p-2">365.63</td>
+                <td className="p-2">+215.63</td>
               </tr>
               <tr className="border-t border-gray-700">
-                <td className="p-2">Carol</td>
+                <td className="p-2">Sophia</td>
                 <td className="p-2">150</td>
                 <td className="p-2">A (Winner)</td>
                 <td className="p-2">Win</td>
-                <td className="p-2">367.50</td>
-                <td className="p-2">+217.50</td>
+                <td className="p-2">365.63</td>
+                <td className="p-2">+215.63</td>
               </tr>
               <tr className="border-t border-gray-700">
-                <td className="p-2">Dave</td>
+                <td className="p-2">Noah</td>
                 <td className="p-2">600</td>
                 <td className="p-2">B (Loser)</td>
                 <td className="p-2">Lose</td>
@@ -301,7 +301,7 @@ const Page = () => {
           Credit Predict Learn
         </h1>
         <p className="text-gray-200 text-sm mt-2">
-          Effective Date: August 20, 2025 | Last Updated: August 20, 2025
+          Effective Date: October 7, 2025 | Last Updated: October 7, 2025
         </p>
       </header>
 

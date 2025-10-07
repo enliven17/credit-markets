@@ -166,7 +166,7 @@ const Page = () => {
     <div className="text-white min-h-screen flex flex-col mt-4">
       <header className="text-center">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Credit Predict Terms of Service</h1>
-        <p className="text-gray-200 text-sm mt-2">Effective Date: August 20, 2025 | Last Updated: August 20, 2025</p>
+        <p className="text-gray-200 text-sm mt-2">Effective Date: October 7, 2025 | Last Updated: October 7, 2025</p>
       </header>
 
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 gap-8">
