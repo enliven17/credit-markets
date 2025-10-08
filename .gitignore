@@ -47,3 +47,4 @@ flow-wager/
 next-env.d.ts
 
 flow-wager test.pkey
+.vercel
