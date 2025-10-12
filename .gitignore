@@ -37,14 +37,9 @@ flow.json
 # vercel
 .vercel
 
-# flow
-emulator-account.pkey
-imports
-flow-wager/
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
-flow-wager test.pkey
 .vercel
