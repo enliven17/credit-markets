@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
       ? "0x1654653399040a61"
       : "0x7e60df042a9c0868",
   },
+  turbopack: {},
   webpack: (config, { isServer }) => {
     // Add the Cadence loader first
     config.module.rules.push({

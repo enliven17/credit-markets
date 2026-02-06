@@ -9,6 +9,7 @@ import { formatCompactCurrency } from "@/lib/constants";
 import Link from "next/link";
 import React from "react";
 import CountUp from "react-countup";
+import { PREDICTION_MARKET_ADDRESS } from "@/lib/contracts/prediction-market";
 
 export default function HomePage() {
     // Use contract hooks for real data
@@ -35,6 +36,7 @@ export default function HomePage() {
     }, [allMarkets, activeMarkets]);
 
     console.log("🏯 HomePage state (detailed):", {
+        contract: PREDICTION_MARKET_ADDRESS,
         marketsLoading,
         marketsError,
         activeMarketsCount: activeMarkets.length,

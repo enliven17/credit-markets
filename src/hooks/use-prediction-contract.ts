@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 export const usePredictionContract = () => {
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { writeContract, data: hash, error, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -18,7 +18,7 @@ export const usePredictionContract = () => {
     try {
       setIsLoading(true);
       console.log('🎯 Placing bet:', { marketId, option, amount });
-      
+
       const result = await writeContract({
         address: PREDICTION_MARKET_ADDRESS,
         abi: PREDICTION_MARKET_ABI,
@@ -26,7 +26,7 @@ export const usePredictionContract = () => {
         args: [BigInt(marketId), option],
         value: parseEther(amount),
       });
-      
+
       toast.success('Bet transaction submitted!');
       return result;
     } catch (error: any) {
@@ -43,14 +43,14 @@ export const usePredictionContract = () => {
     try {
       setIsLoading(true);
       console.log('⚖️ Resolving market:', { marketId, outcome });
-      
+
       const result = await writeContract({
         address: PREDICTION_MARKET_ADDRESS,
         abi: PREDICTION_MARKET_ABI,
         functionName: 'resolveMarket',
         args: [BigInt(marketId), outcome],
       });
-      
+
       toast.success('Market resolution submitted!');
       return result;
     } catch (error: any) {
@@ -77,7 +77,7 @@ export const usePredictionContract = () => {
     try {
       setIsLoading(true);
       console.log('🏗️ Creating market:', marketData);
-      
+
       const result = await writeContract({
         address: PREDICTION_MARKET_ADDRESS,
         abi: PREDICTION_MARKET_ABI,
@@ -94,7 +94,7 @@ export const usePredictionContract = () => {
           marketData.imageUrl,
         ],
       });
-      
+
       toast.success('Market creation submitted!');
       return result;
     } catch (error: any) {
@@ -111,14 +111,14 @@ export const usePredictionContract = () => {
     try {
       setIsLoading(true);
       console.log('💰 Claiming winnings for market:', marketId);
-      
+
       const result = await writeContract({
         address: PREDICTION_MARKET_ADDRESS,
         abi: PREDICTION_MARKET_ABI,
         functionName: 'claimWinnings',
         args: [BigInt(marketId)],
       });
-      
+
       toast.success('Winnings claimed successfully!');
       return result;
     } catch (error: any) {
@@ -152,11 +152,21 @@ export const usePredictionContractRead = () => {
   });
 
   // Get active markets
-  const { data: activeMarkets, isLoading: activeMarketsLoading, refetch: refetchActiveMarkets } = useReadContract({
+  const { data: activeMarkets, isLoading: activeMarketsLoading, refetch: refetchActiveMarkets, error: activeMarketsError } = useReadContract({
     address: PREDICTION_MARKET_ADDRESS,
     abi: PREDICTION_MARKET_ABI,
     functionName: 'getActiveMarkets',
   });
+
+  if (activeMarketsError) {
+    console.error("❌ Wagmi read error (activeMarkets):", activeMarketsError);
+  }
+
+  if (allMarkets) {
+    console.log("📦 Raw All Markets from Contract:", allMarkets);
+  }
+
+  console.log("🔗 Using Contract Address:", PREDICTION_MARKET_ADDRESS);
 
   // Transform contract data to Market type
   const transformContractMarket = (contractMarket: any): Market => {
