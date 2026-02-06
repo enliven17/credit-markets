@@ -16,15 +16,21 @@ if (!creditcoinTestnet) {
 
 console.log("creditcoinTestnet config:", creditcoinTestnet);
 
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "226b43b703188d269fb70d02c107c34e";
+
+if (!process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID) {
+  console.warn("⚠️ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is missing in environment variables. Using fallback ID.");
+}
+
 const wagmiConfig = getDefaultConfig({
   appName: "Credit Predict",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+  projectId: projectId,
   chains: [creditcoinTestnet as any],
   transports: {
     [creditcoinTestnet.id]: http(creditcoinTestnet.rpcUrls.default.http[0]),
   },
   ssr: true,
-}) as any;
+});
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
   return (
