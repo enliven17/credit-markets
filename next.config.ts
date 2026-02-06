@@ -22,7 +22,6 @@ const nextConfig: NextConfig = {
       ? "0x1654653399040a61"
       : "0x7e60df042a9c0868",
   },
-  turbopack: {},
   webpack: (config, { isServer }) => {
     // Add the Cadence loader first
     config.module.rules.push({
@@ -51,9 +50,6 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   pageExtensions: ['ts', 'tsx', 'js', 'jsx']
 };

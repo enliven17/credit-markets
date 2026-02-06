@@ -34,10 +34,11 @@ export default function HomePage() {
         };
     }, [allMarkets, activeMarkets]);
 
-    console.log("🏯 HomePage state (using contract hooks):", {
+    console.log("🏯 HomePage state (detailed):", {
         marketsLoading,
         marketsError,
         activeMarketsCount: activeMarkets.length,
+        activeMarketsIDs: activeMarkets.map(m => m.id),
         featuredMarketsCount: featuredMarkets.length,
         allMarketsCount: allMarkets.length,
     });

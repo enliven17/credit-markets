@@ -18,7 +18,7 @@ console.log("creditcoinTestnet config:", creditcoinTestnet);
 
 const wagmiConfig = getDefaultConfig({
   appName: "Credit Predict",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo",
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
   chains: [creditcoinTestnet as any],
   transports: {
     [creditcoinTestnet.id]: http(creditcoinTestnet.rpcUrls.default.http[0]),
