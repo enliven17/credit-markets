@@ -3,24 +3,26 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "images.unsplash.com",
-      "api.dicebear.com",
-      "flowscan.org",
-      "avatars.githubusercontent.com",
-      "res.cloudinary.com",
+    remotePatterns: [
+      { hostname: "images.unsplash.com" },
+      { hostname: "api.dicebear.com" },
+      { hostname: "flowscan.org" },
+      { hostname: "avatars.githubusercontent.com" },
+      { hostname: "res.cloudinary.com" },
+      { hostname: "cryptologos.cc" },
     ],
   },
   env: {
     NEXT_PUBLIC_FLOW_NETWORK: process.env.NEXT_PUBLIC_FLOW_NETWORK || "testnet",
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS: process.env.NEXT_PUBLIC_FLOW_NETWORK === "mainnet" 
-      ? "0xf233dcee88fe0abe" 
+    NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS: process.env.NEXT_PUBLIC_FLOW_NETWORK === "mainnet"
+      ? "0xf233dcee88fe0abe"
       : "0x9a0766d93b6608b7",
     NEXT_PUBLIC_FLOW_TOKEN_ADDRESS: process.env.NEXT_PUBLIC_FLOW_NETWORK === "mainnet"
       ? "0x1654653399040a61"
       : "0x7e60df042a9c0868",
   },
+  turbopack: {},
   webpack: (config, { isServer }) => {
     // Add the Cadence loader first
     config.module.rules.push({
