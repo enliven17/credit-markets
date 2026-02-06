@@ -39,7 +39,7 @@ export default function MarketsPage() {
     }
   };
 
-  const markets = getMarketsForTab();
+  const markets = getMarketsForTab().filter(market => market.id === "5");
 
   const filteredMarkets = markets.filter(market =>
     market.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

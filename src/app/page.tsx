@@ -13,10 +13,11 @@ import CountUp from "react-countup";
 export default function HomePage() {
     // Use contract hooks for real data
     const { activeMarkets, allMarkets, activeMarketsLoading, allMarketsLoading } = usePredictionContractRead();
-    
+
     const marketsLoading = activeMarketsLoading || allMarketsLoading;
     const marketsError = null;
-    const featuredMarkets = activeMarkets.slice(0, 3); // Show first 3 as featured
+    // Filter to only show Market ID 5
+    const featuredMarkets = activeMarkets.filter(market => market.id === "5");
 
     // No need for useEffect with contract hooks
 
@@ -24,7 +25,7 @@ export default function HomePage() {
     const platformStats = React.useMemo(() => {
         const totalVolume = allMarkets.reduce((sum, market) => sum + parseFloat(market.totalPool || "0"), 0);
         const totalUsers = new Set(allMarkets.map(m => m.creator)).size;
-        
+
         return {
             totalVolume,
             totalUsers,
